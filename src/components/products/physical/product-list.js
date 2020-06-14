@@ -1,8 +1,10 @@
 import React, { Component,Fragment } from 'react'
 import Breadcrumb from '../../common/breadcrumb';
 import data from '../../../assets/data/physical_list';
-import { Edit, Trash2 } from 'react-feather'
-
+import { Edit, Trash2, Link } from 'react-feather'
+import axios from 'axios';
+import IMG4 from "../../../assets/images/product-list/4.jpg"
+import { Button } from 'antd';
 
 export class Product_list extends Component {
     constructor(props) {
@@ -10,8 +12,48 @@ export class Product_list extends Component {
         this.state = {
             data
         }
+        // this.onEditClick=this.onEditClick.bind(this)
+    }
+    async componentWillMount(){
+        let {data} = await axios.get("/product/list", {params: {ownedOnly: true}})
+        let result = data.result.products
+        let products = result.map(product_data=>{
+            let images_list = JSON.parse(product_data.images)
+            if(images_list.length > 0){
+                let images = images_list[0];
+                return {...product_data, images}
+            }else{
+                return {...product_data, images : IMG4}
+            }
+
+        })
+        this.setState((prevState)=>{
+            return {...prevState, data: products}
+        })
+    }
+
+    onEditClick(id){
+        this.props.history.push(`${process.env.PUBLIC_URL}/products/physical/${id}/edit`);
+    }
+    onDeleteClick(id){
+        var payload = {id: id}
+        new Promise((resolve, reject) => {
+            axios
+                .put('product/delete', payload)
+                .then(({data}) => {
+                    if (data.success === true) {
+                        resolve(data);
+                    }
+                    this.props.history.push(`${process.env.PUBLIC_URL}/dashboard`);
+                    this.props.history.push(`${process.env.PUBLIC_URL}/products/physical/product-list`);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
     }
     render() {
+        var CurrencyFormat = require('react-currency-format');
         return (
             <Fragment>
                 <Breadcrumb title="Product List" parent="Physical" />
@@ -30,16 +72,16 @@ export class Product_list extends Component {
                                                             {(myData.discount === 'on sale' )?<span className="lable4">{myData.discount}</span> : '' }
                                                             </div>
                                                         <div className="front">
-                                                            <a className="bg-size"><img className="img-fluid blur-up bg-img lazyloaded" src={myData.image} /></a>
+                                                            <a className="bg-size"><img className="img-fluid blur-up bg-img lazyloaded" src={myData.images} style={{height:"200px"}}/></a>
                                                             <div className="product-hover">
                                                                 <ul>
                                                                     <li>
-                                                                        <button className="btn" type="button">
+                                                                        <Button className="btn" type="button" onClick={() => this.onEditClick(myData.id)}>
                                                                             <Edit className="editBtn" />
-                                                                        </button>
+                                                                        </Button>
                                                                     </li>
                                                                     <li>
-                                                                        <button className="btn" type="button">
+                                                                        <button className="btn" type="button" onClick={() => this.onDeleteClick(myData.id)}>
                                                                             <Trash2 className="deleteBtn" />
                                                                         </button>
                                                                     </li>
@@ -55,13 +97,10 @@ export class Product_list extends Component {
                                                             <i className="fa fa-star"></i>
                                                             <i className="fa fa-star"></i>
                                                         </div>
-                                                        <a> <h6 >{myData.title}</h6></a>
-                                                        <h4 >{myData.price} <del >{myData.discount_price}</del></h4>
-                                                        <ul className="color-variant">
-                                                            <li className="bg-light0"></li>
-                                                            <li className="bg-light1"></li>
-                                                            <li className="bg-light2"></li>
-                                                        </ul>
+                                                        <a> <h6 >{myData.name}</h6></a>
+                                                       
+                                                        <h5 ><CurrencyFormat value={myData.price} displayType={'text'} thousandSeparator={true} prefix={'Rp'} renderText={value => <div>{value}/Day</div>} /> <del >{myData.discount_price}</del></h5>
+                                                        <a> <h6 >{myData.district}, {myData.city}</h6></a>
                                                     </div>
                                                 </div>
                                             </div>

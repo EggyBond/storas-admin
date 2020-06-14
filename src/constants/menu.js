@@ -18,12 +18,8 @@ export const MENUITEMS = [
     },
     {
         title: 'Warehouse', icon: Box, type: 'sub', active: false, children: [
-            {
-                title: 'Physical', type: 'sub', active: false, children: [
-                    { path: '/products/physical/product-list', title: 'Product List', type: 'link' },
-                    { path: '/products/physical/add-product', title: 'Add Product', type: 'link' },
-                ]
-            }
+            { path: '/products/physical/product-list', title: 'Product List', type: 'link' },
+            { path: '/products/physical/add-product', title: 'Add Product', type: 'link' },
         ]
     },
     {

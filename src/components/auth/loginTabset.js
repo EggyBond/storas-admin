@@ -2,16 +2,20 @@ import React, { Component, Fragment } from 'react';
 import { Tabs, TabList, TabPanel, Tab } from 'react-tabs';
 import { User, Unlock } from 'react-feather';
 import { withRouter } from 'react-router-dom';
-import { Input, Form } from 'antd';
+import { Input, Form, notification } from 'antd';
 import axios from 'axios';
+
 export class LoginTabset extends Component {
     constructor(props) {
         super(props);
         this.state = {
             activeShow: true,
-            startDate: new Date()
+            startDate: new Date(),
+            password: ""
         }
         this.handleChange = this.handleChange.bind(this)
+        this.handlePassowrdChange = this.handlePassowrdChange.bind(this)
+        
     }
 
     clickActive = (event) => {
@@ -24,29 +28,40 @@ export class LoginTabset extends Component {
         });
     }
 
-    routeChange = (payload) => {
-        return new Promise((resolve, reject) => {
+    routeChange = (value) => {
+        if(value!== undefined){
+            var payload = value
+            payload.password = this.state.password; 
+            return new Promise((resolve, reject) => {   
+                axios
+                    .post('authentication/login', payload)
+                    .then(({ data, status }) => {
+                        if (status === 200) {
+                            localStorage.setItem('access_token', data.result.authToken)
+                            resolve(data);
+                            this.props.history.push(`${process.env.PUBLIC_URL}/dashboard`);
+                            localStorage.setItem("isLoggedIn", true)
+                        }
 
-            axios
-                .post('authentication/login', payload)
-                .then(({ data, status }) => {
-                    if (status === 200) {
-                        localStorage.setItem('access_token', data.result.authToken)
-                        resolve(data);
-                        this.props.history.push(`${process.env.PUBLIC_URL}/dashboard`);
-                        localStorage.setItem("isLoggedIn", true)
-                    }
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
+                    })
+                    .catch(error => {
+                        console.log(error.response.data.errorMessage)
+                        reject(error);
+                    });
+            });
+        }
+
       }
 
       onFinishFailed = errorInfo => {
         console.log('Failed:', errorInfo);
       };
 
+      handlePassowrdChange(event) {
+
+        var password = event.target.value;
+        this.setState((prevState)=>({...prevState, password}));
+      }
     render() {
 
         return (
@@ -84,12 +99,7 @@ export class LoginTabset extends Component {
                                         </Form.Item>
                                     </div>
                                     <div className="form-group">
-                                        <Form.Item
-                                            name="password"
-                                            rules={[{ required: true, message: 'Please input your password!' }]}
-                                        >
-                                            <Input.Password placeholder="Password" className="form-control"/>
-                                        </Form.Item>
+                                        <input required="" name="password" type="password" className="form-control" placeholder="Password" onChange={this.handlePassowrdChange}/>
                                     </div>
                                     <div className="form-terms">
                                         <div className="custom-control custom-checkbox mr-sm-2">

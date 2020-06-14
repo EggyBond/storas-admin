@@ -43,6 +43,7 @@ import Reports from './reports/report';
 import Invoice from './invoice';
 import Datatable from './common/datatable'
 import axios from 'axios';
+import Edit_product from './products/physical/edit-product';
 
 export class MainComponent extends Component {
 
@@ -59,6 +60,7 @@ export class MainComponent extends Component {
                 <Route path={`${process.env.PUBLIC_URL}/products/physical/product-list`} component={Product_list} />
                 <Route path={`${process.env.PUBLIC_URL}/products/physical/product-detail`} component={Product_detail} />
                 <Route path={`${process.env.PUBLIC_URL}/products/physical/add-product`} component={Add_product} />
+                <Route path={`${process.env.PUBLIC_URL}/products/physical/:id/edit`} component={Edit_product} />
 
                 <Route path={`${process.env.PUBLIC_URL}/products/digital/digital-category`} component={Digital_category} />
                 <Route path={`${process.env.PUBLIC_URL}/products/digital/digital-sub-category`} component={Digital_sub_category} />

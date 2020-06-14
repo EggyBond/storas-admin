@@ -8,8 +8,6 @@ import axios from 'axios';
 import { MyMapComponent } from './MyMapComponent';
 import AvCheckbox from 'availity-reactstrap-validation/lib/AvCheckbox';
 import AvCheckboxGroup from 'availity-reactstrap-validation/lib/AvCheckboxGroup';
-import { Upload } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
 
 export class Add_product extends Component {
     constructor(props) {
@@ -19,16 +17,12 @@ export class Add_product extends Component {
             file: '',
             fileList: [],
             dummyimgs: [
-                { img: user },
-                { img: user },
-                { img: user },
-                { img: user },
-                { img: user },
-                { img: user },
+
             ],
             latlng: { lat: -34.397, lng: 150.644 },
             image_url: [],
-            valid: false
+            valid: false,
+            imagePreview: one
         }
         this.handleSubmitForm=this.handleSubmitForm.bind(this)
         this.onMapClick=this.onMapClick.bind(this)
@@ -67,34 +61,29 @@ export class Add_product extends Component {
     }
 
     handleUpload = ({ fileList }) => {
-        console.log('fileList', fileList);
-    
         this.setState({ fileList });
       };
       
     //image upload
     _handleSubmit(e) {
         e.preventDefault();
-        console.log("hit")
     }
 
     _handleImgChange(e, i) {
         e.preventDefault();
         let file = e.target.files[0];
         if(file === undefined){
-            const { dummyimgs } = this.state;
-            dummyimgs[i].img = user;
             this.setState((prevState)=>{
                 var fileList = prevState.fileList;
                 fileList.splice(i, 1)
-                return {...prevState, fileList, dummyimgs}
+                return {...prevState, fileList}
             })
             
         }else{
             let reader = new FileReader();
             const { dummyimgs } = this.state;
             reader.onloadend = (b) => {
-                dummyimgs[i].img = reader.result;
+                dummyimgs.push({img : reader.result});
                 this.setState((prevState)=>{
                     var fileList = prevState.fileList;
                     fileList.push(b.target.result)
@@ -107,11 +96,25 @@ export class Add_product extends Component {
 
     }
 
+    _handleImgDelete(i) {
+        const { dummyimgs, fileList } = this.state;
+        dummyimgs.splice(i, 1);
+        fileList.splice(i, 1)
+        this.setState((prevState)=>{
+            return {...prevState, fileList, dummyimgs, imagePreview: one}
+        }) 
+    }
+
+    _handleMouseOver(i) {
+        var dummyimgs = this.state.dummyimgs
+        var imagePreview = dummyimgs[i].img === user? one : dummyimgs[i].img
+        this.setState((prevState)=>({...prevState, imagePreview}))
+    }
+
     async handleSubmitForm(event, errors, values) {
         
         event.preventDefault();
         if(this.state.valid){
-            console.log("SUBMIT", values)
             var image_url = []
             for(var i = 0; i < this.state.fileList.length; i++){
                 var imagepayload = {
@@ -121,9 +124,8 @@ export class Add_product extends Component {
                 await axios
                 .post("http://localhost:5000/api/app/asset/upload", imagepayload)
                 .then(res => {
-                    console.log("res", res);
                     image_url.push(res.data.result.url)
-                    console.log("image url", this.state.image_url);
+                    this.props.history.push(`${process.env.PUBLIC_URL}/products/physical/product-list`);
                 })
                 .catch(err => {
                   console.log("err", err);
@@ -136,7 +138,6 @@ export class Add_product extends Component {
             payload.images = JSON.stringify(image_url)
             payload.geolocation = this.state.latlng
             payload.warehouseType = "PASIVE"
-            console.log("payload", payload)
             new Promise((resolve, reject) => {
                 axios
                     .post('product/upsert', payload)
@@ -190,7 +191,7 @@ export class Add_product extends Component {
                                             <div className="add-product">
                                                 <div className="row">
                                                     <div className="col-xl-9 xl-50 col-sm-6 col-9">
-                                                        <img src={this.state.dummyimgs[0].img == user? one: this.state.dummyimgs[0].img } alt="" className="img-fluid image_zoom_1 blur-up lazyloaded" />
+                                                        <img src={this.state.imagePreview} alt="" className="img-fluid image_zoom_1 blur-up lazyloaded" />
                                                     </div>
                                                     <div className="col-xl-3 xl-50 col-sm-6 col-3">
 
@@ -200,15 +201,20 @@ export class Add_product extends Component {
                                                                     return (
                                                                         <li key={i}>
                                                                             <div className="box-input-file">
-                                                                                <input className="upload" type="file" onChange={(e) => this._handleImgChange(e, i)} />
-                                                                                <img src={res.img} style={{ width: 50, height: 50 }} />
-                                                                                <a id="result1" onClick={(e) => this._handleSubmit(e.target.id)}></a>
-
+                                                                                <img src={res.img} style={{ width: 50, height: 50 }} onMouseOver={()=> this._handleMouseOver(i)}/>
                                                                             </div>
+                                                                            <button style={{height: "25px", width: "25px"}} onClick={() => this._handleImgDelete(i)}><h6>x</h6></button>
                                                                         </li>
                                                                     )
                                                                 })
                                                             }
+                                                            <li key={this.state.dummyimgs.length}>
+                                                                <div className="box-input-file">
+                                                                        <input className="upload" type="file" onChange={(e) => this._handleImgChange(e, this.state.dummyimgs.length)} />
+                                                                        <img src={user} style={{ width: 50, height: 50 }}/>
+
+                                                                </div>
+                                                            </li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -236,7 +242,7 @@ export class Add_product extends Component {
                                                     <div className="form-group row">
                                                         <label className="col-xl-3 col-sm-4">Deskripsi :</label>
                                                         <div className="col-xl-8 col-sm-7 description-sm">
-                                                            <AvField className="form-control mb-0" name="decription" id="validationCustom02" type="textarea" required />   
+                                                            <AvField className="form-control mb-0" name="description" id="validationCustom02" type="textarea" required />   
                                                         </div>
                                                     </div>
                                                     <div className="form-group mb-3 row">
@@ -297,9 +303,9 @@ export class Add_product extends Component {
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
                                                         <div className="form-group mb-3 row">
-                                                            <label className="col-xl-3 col-sm-4 mb-0">PDAM :</label>
+                                                            <label className="col-xl-3 col-sm-4 mb-0">PDAM (Tidak Wajib) :</label>
                                                             <div className="col-xl-8 col-sm-7">
-                                                                <AvField className="form-control mb-0" name="padm" id="validationCustom02" type="number" required />
+                                                                <AvField className="form-control mb-0" name="pdam" id="validationCustom02" type="number" />
                                                             </div>
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
