@@ -1,1 +1,1 @@
-storas-admin
+storas

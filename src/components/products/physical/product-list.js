@@ -1,6 +1,6 @@
 import React, { Component,Fragment } from 'react'
 import Breadcrumb from '../../common/breadcrumb';
-import data from '../../../assets/data/physical_list';
+// import data from '../../../assets/data/physical_list';
 import { Edit, Trash2, Link } from 'react-feather'
 import axios from 'axios';
 import IMG4 from "../../../assets/images/product-list/4.jpg"
@@ -10,7 +10,7 @@ export class Product_list extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data
+            data:[]
         }
         // this.onEditClick=this.onEditClick.bind(this)
     }

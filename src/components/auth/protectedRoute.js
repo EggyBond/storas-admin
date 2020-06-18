@@ -5,7 +5,8 @@ import { connect } from 'react-redux'
 const PrivateRoute = ({ component: Component, ...rest }) => {
 
   // Add your own authentication on the below line.
-  const isLoggedIn = localStorage.getItem('isLoggedIn') || false
+  // const isLoggedIn = localStorage.getItem('isLoggedIn') || false
+  const isLoggedIn = true
 
   return (
     <Route

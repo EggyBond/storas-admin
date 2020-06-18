@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { MENUITEMS } from '../../../constants/menu';
 
 // image import
-import logo from '../../../assets/images/dashboard/multikart-logo.png'
+import logo from '../../../assets/images/dashboard/storas-logo.jfif'
 
 export class sidebar extends Component {
 
@@ -155,7 +155,7 @@ export class sidebar extends Component {
                         </div>
                     </div>
                     <div className="sidebar custom-scrollbar">
-                        <User_panel />
+                        <User_panel userData={this.props.userData}/>
                         <ul className="sidebar-menu">
                             {mainmenu}
                         </ul>

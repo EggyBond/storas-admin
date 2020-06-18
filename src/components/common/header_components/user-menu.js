@@ -6,7 +6,6 @@ export class User_menu extends Component {
     onLogout (){
         localStorage.removeItem("access_token");
         localStorage.removeItem("isLoggedIn");
-        console.log("MASUK")
     }
     render() {
         return (
@@ -18,9 +17,6 @@ export class User_menu extends Component {
                         </div>
                         <ul className="profile-dropdown onhover-show-div p-20 profile-dropdown-hover">
                             <li><Link to={`${process.env.PUBLIC_URL}/settings/profile`} ><i data-feather="user"></i>Edit Profile</Link></li>
-                            <li><a href="javascript:void(0)"><i data-feather="mail"></i>Inbox</a></li>
-                            <li><a href="javascript:void(0)"><i data-feather="lock"></i>Lock Screen</a></li>
-                            <li><a href="javascript:void(0)"><i data-feather="settings"></i>Settings</a></li>
                             <li><Link to={`${process.env.PUBLIC_URL}/auth/login`} onClick={this.onLogout}><i data-feather="log-out"></i>Logout</Link></li>
                         </ul>
                     </li>

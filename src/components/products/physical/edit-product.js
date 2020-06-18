@@ -1,6 +1,5 @@
 import React, { Component,Fragment } from 'react';
 import Breadcrumb from '../../common/breadcrumb';
-import CKEditors from "react-ckeditor-component";
 import { AvField, AvForm } from 'availity-reactstrap-validation';
 import one from '../../../assets/images/pro3/1.jpg'
 import user from '../../../assets/images/user.png';
@@ -8,6 +7,8 @@ import axios from 'axios';
 import { MyMapComponent } from './MyMapComponent';
 import AvCheckbox from 'availity-reactstrap-validation/lib/AvCheckbox';
 import AvCheckboxGroup from 'availity-reactstrap-validation/lib/AvCheckboxGroup';
+import ClipLoader from "react-spinners/ClipLoader";
+import { ToastContainer, toast } from 'react-toastify';
 
 export class Edit_product extends Component {
     constructor(props) {
@@ -20,12 +21,13 @@ export class Edit_product extends Component {
 
             ],
             latlng: { 
-                lat: -34.397, 
-                lng: 150.644 
+                lat: -6.297, 
+                lng: 106.644 
             },
             image_url: [],
             valid: false,
             imagePreview: one,
+            loading: false,
             oldData: {
                 additional_facility: [],
                 building_area: 0,
@@ -56,6 +58,7 @@ export class Edit_product extends Component {
         let id = this.props.match.params.id;
         let {data} = await axios.get("/product/detail", {params: {id}})
         let product = data.result;
+        console.log(product)
         product.additional_facility = JSON.parse(product.additional_facility)
         product.images = JSON.parse(product.images)
         this.setState((prevState)=>{
@@ -142,9 +145,9 @@ export class Edit_product extends Component {
     }
 
     async handleSubmitForm(event, errors, values) {
-        
         event.preventDefault();
-        if(this.state.valid){
+        if(errors.length == 0){
+            this.setState((prevState)=>({...prevState, loading: true}))
             var image_url = this.state.oldData.images;
             for(var i = 0; i < this.state.fileList.length; i++){
                 var imagepayload = {
@@ -152,7 +155,7 @@ export class Edit_product extends Component {
                     image: this.state.fileList[i]
                 }
                 await axios
-                .post("http://localhost:5000/api/app/asset/upload", imagepayload)
+                .post("api/app/asset/upload", imagepayload)
                 .then(res => {
                     image_url.push(res.data.result.url)
                 })
@@ -173,10 +176,14 @@ export class Edit_product extends Component {
                     .then(({data}) => {
                         if (data.success === true) {
                             resolve(data);
+                            toast.success("Edit Berhasil!")
                             this.props.history.push(`${process.env.PUBLIC_URL}/products/physical/product-list`);
                         }
+                        this.setState((prevState)=>({...prevState, loading: false}))
                     })
                     .catch(error => {
+                        this.setState((prevState)=>({...prevState, loading: false}))
+                        toast.error("Edit Gagal!" + error)
                         reject(error);
                     });
             });
@@ -214,6 +221,7 @@ export class Edit_product extends Component {
                                 <div className="card-header">
                                     <h5>Add Product</h5>
                                 </div>
+
                                 <div className="card-body">
                                     <div className="row product-adding">
                                         <div className="col-xl-5">
@@ -306,22 +314,16 @@ export class Edit_product extends Component {
                                                     </div>
                                                     <div className="form form-label-center">
                                                         <div className="form-group mb-3 row">
-                                                            <label className="col-xl-3 col-sm-4 mb-0">Luas Area :</label>
-                                                            <div className="col-xl-7 col-sm-7">
+                                                            <label className="col-xl-3 col-sm-4 mb-0">Luas Area ( m<sup>2</sup>):</label>
+                                                            <div className="col-xl-8 col-sm-7">
                                                                 <AvField className="form-control" value={this.state.oldData.building_area} name="building_area" id="validationCustom01" type="number" required />
-                                                            </div>
-                                                            <div className="col-xl-1 col-sm-7">
-                                                                m<sup>2</sup>
                                                             </div>
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
                                                         <div className="form-group mb-3 row">
-                                                            <label className="col-xl-3 col-sm-4 mb-0">Kapasitas Listrik :</label>
-                                                            <div className="col-xl-7 col-sm-7">
+                                                            <label className="col-xl-3 col-sm-4 mb-0">Kapasitas Listrik (kw) :</label>
+                                                            <div className="col-xl-8 col-sm-7">
                                                                 <AvField className="form-control mb-0" value={this.state.oldData.electricity} name="electricity" id="validationCustom02" type="number" required />
-                                                            </div>
-                                                            <div className="col-xl-1 col-sm-7">
-                                                                kW
                                                             </div>
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
@@ -333,9 +335,9 @@ export class Edit_product extends Component {
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
                                                         <div className="form-group mb-3 row">
-                                                            <label className="col-xl-3 col-sm-4 mb-0">PDAM (Tidak Wajib) :</label>
+                                                            <label className="col-xl-3 col-sm-4 mb-0">PDAM (m<sup>3</sup>) :</label>
                                                             <div className="col-xl-8 col-sm-7">
-                                                                <AvField className="form-control mb-0" value={this.state.oldData.pdam} name="pdam" id="validationCustom02" type="number" />
+                                                                    <AvField className="form-control mb-0" value={this.state.oldData.pdam} name="pdam" id="validationCustom02" type="number" />
                                                             </div>
                                                             <div className="valid-feedback">Looks good!</div>
                                                         </div>
@@ -354,17 +356,28 @@ export class Edit_product extends Component {
                                                     </div>
                                                 </div>
                                                 <div className="offset-xl-3 offset-sm-4">
-                                                    <button type="submit" className="btn btn-primary">Add</button>
-                                                    <button type="button" className="btn btn-light">Discard</button>
+                                                    {
+                                                        this.state.loading?
+                                                        <ClipLoader
+                                                            size={50}
+                                                            color={"#123abc"}
+                                                            loading={this.state.loading}
+                                                        />
+                                                        :
+                                                        <button type="submit" className="btn btn-primary">Submit</button>
+                                                    }
+      
                                                 </div>
                                             </AvForm>
                                         </div>
                                     </div>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
                 </div>
+                <ToastContainer />
             </Fragment>
         )
     }

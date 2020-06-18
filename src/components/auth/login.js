@@ -7,6 +7,7 @@ import stats from '../../assets/images/dashboard/stats.png';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { connect } from 'react-redux';
+import { login } from '../../actions'
 
 export class Login extends Component {
     render() {
@@ -16,8 +17,7 @@ export class Login extends Component {
             speed: 500,
             arrows: false
         };
-        const test = this.props;
-        console.log(test)
+        const {login, test} = this.props;
         return (
             <Fragment>
                 <div className="page-wrapper">
@@ -32,19 +32,7 @@ export class Login extends Component {
                                         <Slider className="single-item" {...settings}>
                                             <div>
                                                 <div>
-                                                    <h3>Welcome to Multikart</h3>
-                                                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.</p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div>
-                                                    <h3>Welcome to Multikart</h3>
-                                                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.</p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div>
-                                                    <h3>Welcome to Multikart</h3>
+                                                    <h3>Welcome to Storas</h3>
                                                     <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.</p>
                                                 </div>
                                             </div>
@@ -54,7 +42,7 @@ export class Login extends Component {
                                 <div className="col-md-7 p-0 card-right">
                                     <div className="card tab2-card">
                                         <div className="card-body">
-                                            <LoginTabset />
+                                            <LoginTabset onLogin={login}/>
                                         </div>
                                     </div>
                                 </div>
@@ -75,4 +63,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(Login)
+export default connect(mapStateToProps, {login})(Login)

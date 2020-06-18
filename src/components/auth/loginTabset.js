@@ -4,6 +4,8 @@ import { User, Unlock } from 'react-feather';
 import { withRouter } from 'react-router-dom';
 import { Input, Form, notification } from 'antd';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import ClipLoader from "react-spinners/ClipLoader";
 
 export class LoginTabset extends Component {
     constructor(props) {
@@ -11,7 +13,8 @@ export class LoginTabset extends Component {
         this.state = {
             activeShow: true,
             startDate: new Date(),
-            password: ""
+            password: "",
+            loading: false
         }
         this.handleChange = this.handleChange.bind(this)
         this.handlePassowrdChange = this.handlePassowrdChange.bind(this)
@@ -30,6 +33,7 @@ export class LoginTabset extends Component {
 
     routeChange = (value) => {
         if(value!== undefined){
+            this.setState((prevState)=>({...prevState, loading: true}))
             var payload = value
             payload.password = this.state.password; 
             return new Promise((resolve, reject) => {   
@@ -37,15 +41,20 @@ export class LoginTabset extends Component {
                     .post('authentication/login', payload)
                     .then(({ data, status }) => {
                         if (status === 200) {
+                            this.setState((prevState)=>({...prevState, loading: false}))
                             localStorage.setItem('access_token', data.result.authToken)
                             resolve(data);
+                            var userData = data.result.userData
+                            this.props.onLogin(userData);
                             this.props.history.push(`${process.env.PUBLIC_URL}/dashboard`);
                             localStorage.setItem("isLoggedIn", true)
                         }
 
                     })
                     .catch(error => {
-                        console.log(error.response.data.errorMessage)
+                        this.setState((prevState)=>({...prevState, loading: false}))
+                        toast.error("Email atau Password Salah!")
+                        console.log(error)
                         reject(error);
                     });
             });
@@ -74,6 +83,7 @@ export class LoginTabset extends Component {
                         </TabList>
 
                         <TabPanel>
+                            
                             <Form
                                 name="basic"
                                 initialValues={{ remember: true }}
@@ -101,27 +111,20 @@ export class LoginTabset extends Component {
                                     <div className="form-group">
                                         <input required="" name="password" type="password" className="form-control" placeholder="Password" onChange={this.handlePassowrdChange}/>
                                     </div>
-                                    <div className="form-terms">
-                                        <div className="custom-control custom-checkbox mr-sm-2">
-                                            <input type="checkbox" className="custom-control-input" id="customControlAutosizing" />
-                                            <label className="d-block">
-                                                        <input className="checkbox_animated" id="chk-ani2" type="checkbox" />
-                                                            Reminder Me <span className="pull-right"> <a href="#" className="btn btn-default forgot-pass p-0">lost your password</a></span>
-                                                    </label>
-                                        </div>
-                                    </div>
+               
                                     <div className="form-button">
-                                        <button className="btn btn-primary" type="submit"  onClick={() => this.routeChange()}>Login</button>
+                                        {
+                                            this.state.loading?
+                                                        <ClipLoader
+                                                            size={50}
+                                                            color={"#123abc"}
+                                                            loading={this.state.loading}
+                                                        />
+                                                        :
+                                                <button className="btn btn-primary" type="submit"  onClick={() => this.routeChange()}>Login</button>
+                                        }
                                     </div>
-                                    <div className="form-footer">
-                                        <span>Or Login up with social platforms</span>
-                                        <ul className="social">
-                                            <li><a className="fa fa-facebook" href=""></a></li>
-                                            <li><a className="fa fa-twitter" href=""></a></li>
-                                            <li><a className="fa fa-instagram" href=""></a></li>
-                                            <li><a className="fa fa-pinterest" href=""></a></li>
-                                        </ul>
-                                    </div>
+
                                 </form>
                                 </Form>
                         </TabPanel>
@@ -136,31 +139,16 @@ export class LoginTabset extends Component {
                                 <div className="form-group">
                                     <input required="" name="login[password]" type="password" className="form-control" placeholder="Confirm Password" />
                                 </div>
-                                <div className="form-terms">
-                                    <div className="custom-control custom-checkbox mr-sm-2">
-                                        <input type="checkbox" className="custom-control-input" id="customControlAutosizing" />
-                                        <label className="d-block">
-                                            <input className="checkbox_animated" id="chk-ani2" type="checkbox" />
-                                            I agree all statements in <span><a href="">Terms &amp; Conditions</a></span>
-                                        </label>
-                                    </div>
-                                </div>
+
                                 <div className="form-button">
                                     <button className="btn btn-primary" type="submit" onClick={() => this.routeChange()}>Register</button>
                                 </div>
-                                <div className="form-footer">
-                                    <span>Or Sign up with social platforms</span>
-                                    <ul className="social">
-                                        <li><a className="fa fa-facebook" href=""></a></li>
-                                        <li><a className="fa fa-twitter" href=""></a></li>
-                                        <li><a className="fa fa-instagram" href=""></a></li>
-                                        <li><a className="fa fa-pinterest" href=""></a></li>
-                                    </ul>
-                                </div>
+
                             </form>
                         </TabPanel>
                     </Tabs>
                 </Fragment>
+                <ToastContainer />
             </div>
         )
     }

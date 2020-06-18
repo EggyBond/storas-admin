@@ -12,14 +12,14 @@ export class Breadcrumb extends Component {
                             <div className="col-lg-6">
                                 <div className="page-header-left">
                                     <h3>{this.props.title}
-                                    <small>Multikart Admin panel</small>
+                                    <small>Storas panel</small>
                                     </h3>
                                 </div>
                             </div>
                             <div className="col-lg-6">
                                 <ol className="breadcrumb pull-right">
                                     <li className="breadcrumb-item">
-                                    <Link to="mutikart-admin/dashboard">
+                                    <Link to="/dashboard">
                                             <Home />
                                     </Link>
                                     </li>

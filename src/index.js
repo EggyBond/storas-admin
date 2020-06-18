@@ -12,25 +12,29 @@ import axios from 'axios';
 
 class Root extends Component {
     render() {
-        axios.defaults.baseURL = "http://localhost:5000/api/app";
 
-        axios.interceptors.request.use(
-            (config) => {
-              let token = localStorage.getItem('access_token');
-          
-              if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
-              }
-              return config;
-            },
-          
-            (error) => {
-              return Promise.reject(error);
+      if(process.env.NODE_ENV == "production"){
+        axios.defaults.baseURL = "http://ec2-3-17-57-71.us-east-2.compute.amazonaws.com:5000/api/app";
+      }else{
+        axios.defaults.baseURL = "http://localhost:5000/api/app";
+      }
+      axios.interceptors.request.use(
+          (config) => {
+            let token = localStorage.getItem('access_token');
+        
+            if (token) {
+              config.headers['Authorization'] = `Bearer ${token}`;
             }
-          );
+            return config;
+          },
+        
+          (error) => {
+            return Promise.reject(error);
+          }
+        );
         return (
             <Provider store={store}>
-                <BrowserRouter basename={'/'}>
+                <BrowserRouter basename={'/admin'}>
                     <ScrollContext>
                         <Switch>
                             
