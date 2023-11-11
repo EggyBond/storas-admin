@@ -9,7 +9,7 @@
     "@svgr/webpack": "2.4.1",
     "antd": "4.3.4",
     "availity-reactstrap-validation": "^2.6.1",
-    "axios": "^0.19.2",
+    "axios": "^1.6.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^26.0.1",
     "babel-loader": "8.0.4",
